@@ -1,21 +1,18 @@
 import discord
 
 class snifferbot(discord.Client):
-    async def getChannel(self, channel):
-        print('TODO')
-        #TODO
-
-    async def post(self, channel, message):
-        print('TODO')
-        #TODO
-
     async def on_connect(self):
         print('Connected')
 
     async def on_ready(self):
         print('Logged on as {0}.'.format(self.user))
+        self.guild = self.guilds[0]
+        self.channels = {c.name:c for c in self.guild.text_channels}
 
     async def on_message(self, message):
+        if message.author == self.user:
+            return
+        
         print('Message from {0.author}: {0.content}'.format(message))
 
     async def on_message_edit(self, before, after):
