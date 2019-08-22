@@ -19,7 +19,7 @@ class snifferbot(discord.Client):
             return
 
     async def on_message_edit(self, before, after):
-        report = textwrap.dedent('''\
+        log = textwrap.dedent('''\
                 Message edited by {0} in {1}:
                 From: ```<{2}> {3}```
                 To: ```<{4}> {5}```'''\
@@ -29,7 +29,7 @@ class snifferbot(discord.Client):
         await self.post(report, 'log')
 
     async def on_message_delete(self, message):
-        report = textwrap.dedent('''\
+        log = textwrap.dedent('''\
                 Message deleted by {0} in {1}: ```<{2}> {3}```'''\
                     .format(message.author.mention, message.channel.mention,
                         message.author.name, message.content))
@@ -39,6 +39,10 @@ class snifferbot(discord.Client):
         member.add_roles([self.roles['309mj']])
 
     async def on_member_remove(self, member):
+        if self.roles['mute'] in member.roles:
+            await member.ban()
+            await self.post('Banning {0} for mute dodging.'.format(member.mention), 'log')
+
         message = '{0} left the server.'.format(member.name)
         await self.post(message, 'reception')
 
