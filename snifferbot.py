@@ -41,7 +41,7 @@ class snifferbot(discord.Client):
     async def on_member_remove(self, member):
         if self.roles['mute'] in member.roles:
             await member.ban()
-            await self.post('Banning {0} for mute dodging.'.format(member.mention), 'log')
+            await self.post('Banning {0} for mute evading.'.format(member.mention), 'log')
 
         message = '{0} left the server.'.format(member.name)
         await self.post(message, 'reception')
