@@ -9,8 +9,7 @@ class snifferbot(discord.Client):
 
     async def on_ready(self):
         await self.initialize()
-        # await self.post('Ready', 'log')
-        print('Ready')
+        await self.post('Ready', 'log')
 
 
     async def on_message(self, message):
