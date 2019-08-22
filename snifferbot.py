@@ -1,4 +1,4 @@
-import discord
+import discord, textwrap
 
 class snifferbot(discord.Client):
     '''
@@ -9,7 +9,7 @@ class snifferbot(discord.Client):
         print('Connected')
 
     async def on_ready(self):
-        print('Logged on as {0}.'.format(self.user))
+        print('Ready')
         self.guild = self.guilds[0]
         self.channels = {c.name.lower():c for c in self.guild.text_channels}
         self.roles = {r.name.lower():r for r in self.guild.roles}
@@ -17,14 +17,23 @@ class snifferbot(discord.Client):
     async def on_message(self, message):
         if message.author == self.user:
             return
-        
-        print('Message from {0.author}: {0.content}'.format(message))
 
     async def on_message_edit(self, before, after):
-        print('Message from {0.author}: {0.content}'.format(before))
+        report = textwrap.dedent('''\
+                Message edited by {0} in {1}:
+                From: ```<{2}> {3}```
+                To: ```<{4}> {5}```'''\
+                    .format(before.author.mention, before.channel.mention,
+                        before.author.name, before.content,
+                        after.author.name, after.content))
+        await self.post(report, 'log')
 
     async def on_message_delete(self, message):
-        print('Message from {0.author}: {0.content}'.format(message))
+        report = textwrap.dedent('''\
+                Message deleted by {0} in {1}: ```<{2}> {3}```'''\
+                    .format(message.author.mention, message.channel.mention,
+                        message.author.name, message.content))
+        await self.post(report, 'log')
 
     async def on_member_join(self, member):
         member.add_roles([self.roles['309mj']])
@@ -39,3 +48,6 @@ class snifferbot(discord.Client):
 
     async def post(self, message, channel):
         await self.channels[channel].send(message)
+
+    # async def region(self, member, region):
+
