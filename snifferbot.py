@@ -1,4 +1,4 @@
-import discord, json, textwrap
+import discord, json, textwrap, threading, time
 
 class snifferbot(discord.Client):
 
@@ -8,7 +8,7 @@ class snifferbot(discord.Client):
 
     async def on_ready(self):
         await self.initialize()
-        # await self.post('Ready', 'dev')
+        # await self.post('Ready', 'log')
         print('Ready')
 
     async def on_message(self, message):
@@ -82,11 +82,16 @@ class snifferbot(discord.Client):
             await self.post('Region set.', 'reception')
 
     # async def remind(self):
-        # TODO
+    #     while self.is_ready():
+    #         await self.post('async', 'log')
+    #         time.sleep(3)
 
     async def handle_message(self, message):
         if message.author == self.user:
             return
+        if message.content.lower() == '!ping'\
+            and message.author.name.lower() == 'blankaex':
+            await self.post('pong', message.channel.name)
         if message.content.lower().startswith('!region ')\
             and message.channel == self.channels['reception']:
             await self.region(message)
