@@ -87,7 +87,7 @@ class snifferbot(discord.Client):
         command = message.content.lower()
         channel = message.channel.name.lower()
 
-        if command == '!ping' and author == 'blankaex':
+        if command == '!ping' and self.roles['admin'] in author.roles:
             await self.post('pong', message.channel.name)
 
         if command.startswith('!region ') and channel == 'reception':
