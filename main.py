@@ -1,5 +1,5 @@
-from bot import *
+from snifferbot import *
 
-bot = bot()
+bot = snifferbot()
 with open('token', 'r') as token:
     bot.run(token.read())
