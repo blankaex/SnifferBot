@@ -1,4 +1,4 @@
-import discord, json, textwrap, random
+import discord, json, textwrap, random, re
 
 class snifferbot(discord.Client):
 
@@ -95,6 +95,9 @@ class snifferbot(discord.Client):
         if command.startswith('!8ball '):
             await self.eightball(channel)
 
+        if command.startswith('!decide '):
+            await self.decide(command, channel)
+
 
 
     '''
@@ -122,3 +125,8 @@ class snifferbot(discord.Client):
         with open('data/8ball', 'r') as responses:
             line = random.choice(responses.readlines())
         await self.post(line, channel)
+
+
+    async def decide(self, command, channel):
+        choice = random.choice(re.split(', | or ', command[8:]))
+        await self.post(choice, channel)
