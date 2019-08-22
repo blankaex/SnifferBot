@@ -1,4 +1,5 @@
-import discord, json, textwrap, random, re
+import discord, json, textwrap
+import random, re, requests, html
 
 class snifferbot(discord.Client):
 
@@ -98,6 +99,9 @@ class snifferbot(discord.Client):
         if command.startswith('!decide '):
             await self.decide(command, channel)
 
+        if command.startswith('!translate '):
+            await self.translate(command, channel)
+
 
 
     '''
@@ -130,3 +134,29 @@ class snifferbot(discord.Client):
     async def decide(self, command, channel):
         choice = random.choice(re.split(', | or ', command[8:]))
         await self.post(choice, channel)
+
+
+    async def translate(self, command, channel):
+        try:
+            instruction, fromlang, tolang, *text = command.split()
+
+            with open('data/languages', 'r') as languages:
+                l = json.load(languages)
+            
+            if not fromlang in l.values():
+                fromlang = l[fromlang]
+
+            if not tolang in l.values():
+                tolang = l[tolang]
+
+            text = '%20'.join(text)
+            url = 'http://translate.google.com/m?hl={1}&sl={0}&q={2}&ie=UTF-8&oe=UTF-8'\
+                .format(fromlang, tolang, text)
+            r = requests.get(url)
+            translation = re.search('<div dir="ltr" class="t0">(.*?)</div>',
+                html.unescape(r.text)).groups()[0]
+
+            await self.post(translation, channel)
+
+        except:
+            await self.post('Usage: `!translate [language from] [language to] [text]`', channel)
