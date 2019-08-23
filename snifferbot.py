@@ -42,6 +42,7 @@ class snifferbot(discord.Client):
         self.guild = self.guilds[0]
         self.channels = {c.name.lower():c for c in self.guild.text_channels}
         self.roles = {r.name.lower():r for r in self.guild.roles}
+        self.emotes = {e.name.lower():e for e in self.guild.emojis}
         with open('data/regions', 'r') as regions:
             self.regions = json.load(regions)
 
@@ -57,8 +58,7 @@ class snifferbot(discord.Client):
         if type == 'edit':
             log = textwrap.dedent('''\
                 Message edited by {0} in {1}:
-                From: ```<{2}> {3}```\
-                To: ```<{4}> {5}```'''\
+                From: ```<{2}> {3}```To: ```<{4}> {5}```'''\
                     .format(message.author.mention, message.channel.mention,
                         message.author.name, message.content,
                         after.author.name, after.content))
@@ -147,8 +147,11 @@ class snifferbot(discord.Client):
 
 
     async def decide(self, args, channel):
-        choice = random.choice(re.split(', | or ', args))
-        await self.post(choice, channel)
+        if args:
+            choice = random.choice(re.split(', | or ', args))
+            await self.post(choice, channel)
+        else:
+            await self.post('Usage: `!decide [CHOICE1] or [CHOICE2] ...`', channel)
 
 
     async def fortune(self, channel):
@@ -158,10 +161,10 @@ class snifferbot(discord.Client):
 
 
     async def lart(self, args, channel, author):
-        if not args:
-            user = author.mention
+        if args:
+            user = ' '.join(args)
         else:
-            user = args[0]
+            user = author.mention
         with open('data/larts', 'r') as larts:
             lart = random.choice(larts.readlines()).format(user)
         await self.post(lart, channel)
