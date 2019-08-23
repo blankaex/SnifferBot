@@ -84,6 +84,8 @@ class snifferbot(discord.Client):
             return
 
         command, *args = message.content.lower().split(' ', 1)
+        args = args[0] if args else None
+
         channel = message.channel.name.lower()
 
         if command == '!ping' and self.roles['admin'] in author.roles:
@@ -117,12 +119,11 @@ class snifferbot(discord.Client):
     '''
 
     async def region(self, args, author):
-        region, *_ = args.split()
-
         if not self.roles['309mj'] in author.roles:
             await self.post('You already have a region.', 'reception')
             return
 
+        region, *_ = args.split(' ', 1)
         if not region in self.regions:
             await self.post(textwrap.dedent('''\
                 Invalid region. Usage: `!region [REGION]`
@@ -161,10 +162,7 @@ class snifferbot(discord.Client):
 
 
     async def lart(self, args, channel, author):
-        if args:
-            user = ' '.join(args)
-        else:
-            user = author.mention
+        user = args if args else author.mention
         with open('data/larts', 'r') as larts:
             lart = random.choice(larts.readlines()).format(user)
         await self.post(lart, channel)
@@ -172,7 +170,7 @@ class snifferbot(discord.Client):
 
     async def translate(self, args, channel):
         try:
-            fromlang, tolang, text = args.split(' ', 2)
+            fromlang, tolang, text = re.split(' to |, | ', args, 2)
 
             with open('data/languages', 'r') as languages:
                 l = json.load(languages)
