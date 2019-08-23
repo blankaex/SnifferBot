@@ -57,7 +57,7 @@ class snifferbot(discord.Client):
         if type == 'edit':
             log = textwrap.dedent('''\
                 Message edited by {0} in {1}:
-                From: ```<{2}> {3}```
+                From: ```<{2}> {3}```\
                 To: ```<{4}> {5}```'''\
                     .format(message.author.mention, message.channel.mention,
                         message.author.name, message.content,
@@ -83,23 +83,26 @@ class snifferbot(discord.Client):
         if author == self.user:
             return
 
-        command = message.content.lower()
+        command, args = message.content.lower().split(' ', 1)
         channel = message.channel.name.lower()
 
         if command == '!ping' and self.roles['admin'] in author.roles:
-            await self.post('pong', message.channel.name)
+            await self.post('pong', channel)
 
-        if command.startswith('!region ') and channel == 'reception':
-            await self.region(author, command.split()[1])
+        if command == '!region' and channel == 'reception':
+            await self.region(args, author)
 
-        if command.startswith('!8ball '):
+        if command == '!8ball':
             await self.eightball(channel)
 
-        if command.startswith('!decide '):
-            await self.decide(command, channel)
+        if command == '!decide':
+            await self.decide(args, channel)
 
-        if command.startswith('!translate '):
-            await self.translate(command, channel)
+        if command == '!translate':
+            await self.translate(args, channel)
+
+        if command == '!youtube':
+            await self.youtube(args, channel)
 
 
 
@@ -107,8 +110,10 @@ class snifferbot(discord.Client):
     Commands
     '''
 
-    async def region(self, member, region):
-        if not self.roles['309mj'] in member.roles:
+    async def region(self, args, author):
+        region, *_ = args.split()
+
+        if not self.roles['309mj'] in author.roles:
             await self.post('You already have a region.', 'reception')
             return
 
@@ -119,8 +124,8 @@ class snifferbot(discord.Client):
                 Example: `!region usa`'''), 'reception')
 
         else:
-            await member.add_roles(self.roles[self.regions[region]])
-            await member.remove_roles(self.roles['309mj'])
+            await author.add_roles(self.roles[self.regions[region]])
+            await author.remove_roles(self.roles['309mj'])
             await self.post('Region set.', 'reception')
 
 
@@ -130,14 +135,14 @@ class snifferbot(discord.Client):
         await self.post(line, channel)
 
 
-    async def decide(self, command, channel):
-        choice = random.choice(re.split(', | or ', command[8:]))
+    async def decide(self, args, channel):
+        choice = random.choice(re.split(', | or ', args))
         await self.post(choice, channel)
 
 
-    async def translate(self, command, channel):
+    async def translate(self, args, channel):
         try:
-            instruction, fromlang, tolang, *text = command.split()
+            fromlang, tolang, text = args.split(' ', 2)
 
             with open('data/languages', 'r') as languages:
                 l = json.load(languages)
@@ -148,7 +153,6 @@ class snifferbot(discord.Client):
             if not tolang in l.values():
                 tolang = l[tolang]
 
-            text = '%20'.join(text)
             url = 'http://translate.google.com/m?hl={1}&sl={0}&q={2}&ie=UTF-8&oe=UTF-8'\
                 .format(fromlang, tolang, text)
             r = requests.get(url)
@@ -159,3 +163,6 @@ class snifferbot(discord.Client):
 
         except:
             await self.post('Usage: `!translate [language from] [language to] [text]`', channel)
+            
+    async def youtube(self, args, channel):
+        return
