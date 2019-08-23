@@ -98,6 +98,9 @@ class snifferbot(discord.Client):
         if command == '!decide':
             await self.decide(args, channel)
 
+        if command == '!lart':
+            await self.lart(args, channel)
+
         if command == '!translate':
             await self.translate(args, channel)
 
@@ -128,14 +131,19 @@ class snifferbot(discord.Client):
 
     async def eightball(self, channel):
         with open('data/8ball', 'r') as responses:
-            line = random.choice(responses.readlines())
-        await self.post(line, channel)
+             response = random.choice(responses.readlines())
+        await self.post(response, channel)
 
 
     async def decide(self, args, channel):
         choice = random.choice(re.split(', | or ', args))
         await self.post(choice, channel)
 
+
+    async def lart(self, args, channel):
+        with open('data/larts', 'r') as larts:
+            lart = random.choice(larts.readlines()).format(args)
+        await self.post(lart, channel)
 
     async def translate(self, args, channel):
         try:
