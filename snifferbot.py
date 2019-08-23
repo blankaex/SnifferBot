@@ -150,17 +150,17 @@ class snifferbot(discord.Client):
             if not tolang in l.values():
                 tolang = l[tolang]
 
+            try:
+                url = 'http://translate.google.com/m?hl={1}&sl={0}&q={2}&ie=UTF-8&oe=UTF-8'\
+                    .format(fromlang, tolang, text)
+                r = requests.get(url)
+                translation = html.unescape(re.search('<div dir="ltr" class="t0">(.*?)</div>',
+                    r.text).groups()[0])
+
+                await self.post(translation, channel)
+
+            except:
+                await self.post('API Error.', channel)
+
         except:
             await self.post('Usage: `!translate [language from] [language to] [text]`', channel)
-
-        try:
-            url = 'http://translate.google.com/m?hl={1}&sl={0}&q={2}&ie=UTF-8&oe=UTF-8'\
-                .format(fromlang, tolang, text)
-            r = requests.get(url)
-            translation = html.unescape(re.search('<div dir="ltr" class="t0">(.*?)</div>',
-                r.text).groups()[0])
-
-            await self.post(translation, channel)
-
-        except:
-            await self.post('API Error.', channel)
