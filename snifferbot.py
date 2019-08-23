@@ -83,7 +83,7 @@ class snifferbot(discord.Client):
         if author == self.user:
             return
 
-        command, args = message.content.lower().split(' ', 1)
+        command, *args = message.content.lower().split(' ', 1)
         channel = message.channel.name.lower()
 
         if command == '!ping' and self.roles['admin'] in author.roles:
@@ -97,6 +97,9 @@ class snifferbot(discord.Client):
 
         if command == '!decide':
             await self.decide(args, channel)
+
+        if command == '!fortune':
+            await self.fortune(channel)
 
         if command == '!lart':
             await self.lart(args, channel)
@@ -140,10 +143,17 @@ class snifferbot(discord.Client):
         await self.post(choice, channel)
 
 
+    async def fortune(self, channel):
+        with open('data/fortunes', 'r') as fortunes:
+             fortune = random.choice(fortunes.readlines())
+        await self.post(fortune, channel)
+
+
     async def lart(self, args, channel):
         with open('data/larts', 'r') as larts:
             lart = random.choice(larts.readlines()).format(args)
         await self.post(lart, channel)
+
 
     async def translate(self, args, channel):
         try:
