@@ -92,6 +92,9 @@ class snifferbot(discord.Client):
         if command == '!region' and channel == 'reception':
             await self.region(args, author)
 
+        if command == '!help':
+            await self.help(channel)
+
         if command == '!8ball':
             await self.eightball(channel)
 
@@ -102,7 +105,7 @@ class snifferbot(discord.Client):
             await self.fortune(channel)
 
         if command == '!lart':
-            await self.lart(args, channel)
+            await self.lart(args, channel, author)
 
         if command == '!translate':
             await self.translate(args, channel)
@@ -132,6 +135,11 @@ class snifferbot(discord.Client):
             await self.post('Region set.', 'reception')
 
 
+    async def help(self, channel):
+        with open('data/help', 'r') as help:
+            await self.post(help.read(), channel)
+
+
     async def eightball(self, channel):
         with open('data/8ball', 'r') as responses:
              response = random.choice(responses.readlines())
@@ -149,9 +157,13 @@ class snifferbot(discord.Client):
         await self.post(fortune, channel)
 
 
-    async def lart(self, args, channel):
+    async def lart(self, args, channel, author):
+        if not args:
+            user = author.mention
+        else:
+            user = args[0]
         with open('data/larts', 'r') as larts:
-            lart = random.choice(larts.readlines()).format(args)
+            lart = random.choice(larts.readlines()).format(user)
         await self.post(lart, channel)
 
 
