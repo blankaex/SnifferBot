@@ -17,11 +17,11 @@ class snifferbot(discord.Client):
 
 
     async def on_message_edit(self, before, after):
-        await self.log('edit', before, after)
+        await self.log_edit(before, after)
 
 
     async def on_message_delete(self, message):
-        await self.log('delete', message)
+        await self.log_delete(message)
 
 
     async def on_member_join(self, member):
@@ -51,23 +51,28 @@ class snifferbot(discord.Client):
         await self.channels[channel].send(message)
 
 
-    async def log(self, type, message, after=None):
+    async def log_edit(self, before, after):
+        if before.author.name.lower() == 'snifferbot' or before.content == after.content:
+                return
+
+        log = textwrap.dedent('''\
+            Message edited by {0} in {1}:
+            From: ```<{2}> {3}```To: ```<{4}> {5}```'''\
+                .format(before.author.mention, before.channel.mention,
+                    before.author.name, before.content,
+                    after.author.name, after.content))
+
+        await self.post(log, 'log')
+
+
+    async def log_delete(self, message):
         if message.author.name.lower() == 'snifferbot':
-            return
+                return
 
-        if type == 'edit':
-            log = textwrap.dedent('''\
-                Message edited by {0} in {1}:
-                From: ```<{2}> {3}```To: ```<{4}> {5}```'''\
-                    .format(message.author.mention, message.channel.mention,
-                        message.author.name, message.content,
-                        after.author.name, after.content))
-
-        if type == 'delete':
-            log = textwrap.dedent('''\
-                Message deleted by {0} in {1}: ```<{2}> {3}```'''\
-                    .format(message.author.mention, message.channel.mention,
-                        message.author.name, message.content))
+        log = textwrap.dedent('''\
+            Message deleted by {0} in {1}: ```<{2}> {3}```'''\
+                .format(message.author.mention, message.channel.mention,
+                    message.author.name, message.content))
 
         await self.post(log, 'log')
 
