@@ -73,7 +73,6 @@ class snifferbot(discord.Client):
         description = textwrap.dedent('''\
             **From:**
             {0}
-
             **To:**
             {1}'''.format(before.content, after.content))
         await self.post_embed(color=0xFFFF40, title=title, description=description, channel='log')
