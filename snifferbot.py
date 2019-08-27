@@ -1,4 +1,4 @@
-import discord, json, textwrap
+import discord, json, textwrap, time
 import random, re, requests, html
 
 class snifferbot(discord.Client):
@@ -25,12 +25,13 @@ class snifferbot(discord.Client):
 
 
     async def on_member_join(self, member):
+        await self.log_join(member)
         await member.add_roles(self.roles['309mj'])
 
 
     async def on_member_remove(self, member):
+        await self.log_leave(member)
         await self.check_evade(member)
-        await self.post('{0} left the server.'.format(member.name), 'reception')
 
 
 
@@ -51,36 +52,56 @@ class snifferbot(discord.Client):
         await self.channels[channel].send(message)
 
 
+    async def post_embed(self, color=0x2D2D2D, title=None, description=None,
+            author=None, icon=None, thumbnail=None, channel='log'):
+        embed = discord.Embed(color=color)
+        if title and description:
+            embed.add_field(name=title, value=description, inline=False)
+        if author and icon:
+            embed.set_author(name=author, url=discord.Embed.Empty, icon_url=icon)
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
+        embed.set_footer(text=time.ctime())
+        await self.channels[channel].send(embed=embed)
+
+
     async def log_edit(self, before, after):
         if before.author.name.lower() == 'snifferbot' or before.content == after.content:
-                return
+            return
 
-        log = textwrap.dedent('''\
-            Message edited by {0} in {1}:
-            From: ```<{2}> {3}```To: ```<{4}> {5}```'''\
-                .format(before.author.mention, before.channel.mention,
-                    before.author.name, before.content,
-                    after.author.name, after.content))
+        title = 'Message edited by @{0} in #{1}:'.format(before.author.name, before.channel.name)
+        description = textwrap.dedent('''\
+            **From:**
+            {0}
 
-        await self.post(log, 'log')
+            **To:**
+            {1}'''.format(before.content, after.content))
+        await self.post_embed(color=0xFFFF40, title=title, description=description, channel='log')
 
 
     async def log_delete(self, message):
         if message.author.name.lower() == 'snifferbot':
-                return
+            return
 
-        log = textwrap.dedent('''\
-            Message deleted by {0} in {1}: ```<{2}> {3}```'''\
-                .format(message.author.mention, message.channel.mention,
-                    message.author.name, message.content))
+        title = 'Message deleted by @{0} in #{1}:'.format(message.author.name, message.channel.name)
+        await self.post_embed(color=0xFF4040, title=title, description=message.content, channel='log')
 
-        await self.post(log, 'log')
+
+    async def log_join(self, member):
+        message = '{0} has joined the server'.format(member.name)
+        await self.post_embed(color=0x40FF40, author=message, icon=member.avatar_url, channel='reception')
+
+
+    async def log_leave(self, member):
+        message = '{0} has left the server'.format(member.name)
+        await self.post_embed(color=0xFF4040, author=message, icon=member.avatar_url, channel='reception')
 
 
     async def check_evade(self, member):
         if self.roles['mute'] in member.roles:
             await member.ban()
-            await self.post('Banning {0} for mute evading.'.format(member.mention), 'log')
+            message = 'Banning {0} for mute evading.'.format(member.author.name)
+            await self.post_embed(color=0xFF0000, title=message, channel='log')
 
 
     async def handle_message(self, message):
@@ -186,17 +207,19 @@ class snifferbot(discord.Client):
             if not tolang in l.values():
                 tolang = l[tolang]
 
-            try:
-                url = 'http://translate.google.com/m?hl={1}&sl={0}&q={2}&ie=UTF-8&oe=UTF-8'\
-                    .format(fromlang, tolang, text)
-                r = requests.get(url)
-                translation = html.unescape(re.search('<div dir="ltr" class="t0">(.*?)</div>',
-                    r.text).groups()[0])
+            url = 'http://translate.google.com/m?hl={1}&sl={0}&q={2}&ie=UTF-8&oe=UTF-8'\
+                .format(fromlang, tolang, text)
+            r = requests.get(url)
+            translation = html.unescape(re.search('<div dir="ltr" class="t0">(.*?)</div>',
+                r.text).groups()[0])
 
-                await self.post(translation, channel)
+            if r.status_code != requests.codes.ok:
+                raise APIError
 
-            except:
-                await self.post('API Error.', channel)
+            await self.post(translation, channel)
+
+        except APIError:
+            await self.post('API Error.', channel)
 
         except:
             await self.post('Usage: `!translate [language from] [language to] [text]`', channel)
