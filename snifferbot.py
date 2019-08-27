@@ -55,7 +55,7 @@ class snifferbot(discord.Client):
     async def post_embed(self, color=0x2D2D2D, title=None, description=None,
             author=None, icon=None, thumbnail=None, channel='log'):
         embed = discord.Embed(color=color)
-        if title and description:
+        if title or description:
             embed.add_field(name=title, value=description, inline=False)
         if author and icon:
             embed.set_author(name=author, url=discord.Embed.Empty, icon_url=icon)
@@ -99,7 +99,7 @@ class snifferbot(discord.Client):
     async def check_evade(self, member):
         if self.roles['mute'] in member.roles:
             await member.ban()
-            message = 'Banning {0} for mute evading.'.format(member.author.name)
+            message = 'Banning {0} for mute evading.'.format(member.name)
             await self.post_embed(color=0xFF0000, title=message, channel='log')
 
 
