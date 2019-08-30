@@ -174,7 +174,11 @@ class snifferbot(discord.Client):
 
     async def decide(self, args, channel):
         if args:
-            choice = random.choice(re.split(', | or ', args))
+            choices = re.split(', | or ', args)
+            if len(choices) == 1:
+                choice = random.choice(['yes', 'no'])
+            else:
+                choice = random.choice(choices)
             await self.post(choice, channel)
         else:
             await self.post('Usage: `!decide [CHOICE1] or [CHOICE2] ...`', channel)
