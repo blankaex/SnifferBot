@@ -163,7 +163,7 @@ class snifferbot(discord.Client):
 
     async def help(self, channel):
         with open('data/help', 'r') as help:
-            await self.post(help.read(), channel)
+            await self.post_embed(title='Commands:', description=help.read(), channel=channel)
 
 
     async def eightball(self, channel):
