@@ -116,8 +116,6 @@ class snifferbot(discord.Client):
                 await user.add_roles(self.roles['asia'])
                 await user.remove_roles(self.roles['309mj'])
 
-    async def region(self, args, author):
-
 
     async def handle_message(self, message):
         author = message.author
