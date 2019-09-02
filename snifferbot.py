@@ -9,7 +9,7 @@ class snifferbot(discord.Client):
 
     async def on_ready(self):
         await self.initialize()
-        await self.post('Ready', 'log')
+        await self.post('Ready', 'dev')
 
 
     async def on_message(self, message):
@@ -32,6 +32,10 @@ class snifferbot(discord.Client):
     async def on_member_remove(self, member):
         await self.log_leave(member)
         await self.check_evade(member)
+
+
+    async def on_raw_reaction_add(self, payload):
+        await self.check_jp(payload)
 
 
 
@@ -101,6 +105,12 @@ class snifferbot(discord.Client):
             await member.ban()
             message = 'Banning {0} for mute evading.'.format(member.name)
             await self.post_embed(color=0xFF0000, title=message, channel='log')
+
+
+    async def check_jp(self, payload):
+        # refactor to add a check for payload.event_type when discord.py updates to 1.3.0
+        if payload.message_id == 618081830914097192 and payload.emoji.name == '🇯🇵':
+            await self.guild.get_member(payload.user_id).add_roles(self.roles['japanese'])
 
 
     async def handle_message(self, message):
