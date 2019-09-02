@@ -110,7 +110,13 @@ class snifferbot(discord.Client):
     async def check_jp(self, payload):
         # refactor to add a check for payload.event_type when discord.py updates to 1.3.0
         if payload.message_id == 618081830914097192 and payload.emoji.name == '🇯🇵':
-            await self.guild.get_member(payload.user_id).add_roles(self.roles['japanese'])
+            user = self.guild.get_member(payload.user_id)
+            await user.add_roles(self.roles['japanese'])
+            if self.roles['309mj'] in user.roles:
+                await user.add_roles(self.roles['asia'])
+                await user.remove_roles(self.roles['309mj'])
+
+    async def region(self, args, author):
 
 
     async def handle_message(self, message):
