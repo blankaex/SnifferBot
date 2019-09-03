@@ -122,6 +122,9 @@ class snifferbot(discord.Client):
         if author == self.user:
             return
 
+        if not message.content.startswith('!'):
+            return
+
         command, *args = message.content.lower().split(' ', 1)
         args = args[0] if args else None
 
@@ -150,6 +153,9 @@ class snifferbot(discord.Client):
 
         if command == '!translate':
             await self.translate(args, channel)
+
+        if command == '!w' or command == '!weather':
+            await self.weather(args, channel)
 
 
 
@@ -235,8 +241,50 @@ class snifferbot(discord.Client):
 
             await self.post(translation, channel)
 
-        except APIError:
+        except Exception as APIError:
             await self.post('API Error.', channel)
 
         except:
             await self.post('Usage: `!translate [language from] [language to] [text]`', channel)
+
+
+    async def weather(self, city, channel):
+        if isinstance(city, list):
+            raise CityNotFound
+
+        url = 'https://api.openweathermap.org/data/2.5/weather'
+        with open('tokens/weather') as w:
+            token = w.read().strip()
+        params = {'q': city, 'appid': token, 'units': 'metric'}
+
+        try:
+            d = requests.get(url, params=params).json()
+
+            if d['cod'] == '404' and d['message'] == 'city not found':
+                raise CityNotFound
+            if d['cod'] == '429':
+                raise APILimitExceeded
+
+            temp = d['main']['temp']
+            tempf = round(9 * temp / 5.0 + 32, 2)
+            wind = d['wind']['speed']
+            windm = round(wind * 2.237, 1)
+
+            title = 'Current weather in {0}, {1}:'.format(d['name'], d['sys']['country'])
+            description = textwrap.dedent('''\
+                **Conditions:** {0} ::  \
+                **Temperature:** {1}°C | {2}°F ::  \
+                **Humidity:** {3}%  ::  \
+                **Wind:** {4}m/s | {5}mph\
+                '''.format(d['weather'][0]['main'], temp, tempf, d['main']['humidity'], wind, windm))
+
+            await self.post_embed(title=title, description=description, channel=channel)
+
+        except Exception as CityNotFound:
+            await self.post('City not found.', channel)
+
+        except Exception as APILimitExceeded:
+            await self.post('API limit exceeded. Try again tomorrow', channel)
+
+        except:
+            await self.post('API Error.', channel)
