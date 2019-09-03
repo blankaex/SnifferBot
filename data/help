@@ -18,3 +18,6 @@ Larts a user.
 
 `!translate [FROMLANG] [TOLANG] [TEXT]`
 Translate a message.
+
+`!weather [CITY]`
+See the current weather.
