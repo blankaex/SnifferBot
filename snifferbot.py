@@ -284,9 +284,6 @@ class snifferbot(discord.Client):
                 '''.format(cond, temp, tempf, humi, wind, windm))
             await self.post_embed(title=title, description=description, channel=channel)
 
-        except Exception as InsufficientArgs:
-            await self.post('Usage: `!weather [CITY]`', channel)
-
         except Exception as CityNotFound:
             await self.post('City not found.', channel)
 
