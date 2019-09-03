@@ -241,8 +241,11 @@ class snifferbot(discord.Client):
 
             await self.post(translation, channel)
 
+        except KeyError:
+            await self.post('Invalid language.', channel)
+
         except Exception as APIError:
-            await self.post('API Error.', channel)
+            await self.post('API error.', channel)
 
         except:
             await self.post('Usage: `!translate [language from] [language to] [text]`', channel)
@@ -281,6 +284,9 @@ class snifferbot(discord.Client):
                 '''.format(cond, temp, tempf, humi, wind, windm))
             await self.post_embed(title=title, description=description, channel=channel)
 
+        except Exception as InsufficientArgs:
+            await self.post('Usage: `!weather [CITY]`', channel)
+
         except Exception as CityNotFound:
             await self.post('City not found.', channel)
 
@@ -288,4 +294,4 @@ class snifferbot(discord.Client):
             await self.post('API limit exceeded. Try again tomorrow', channel)
 
         except:
-            await self.post('API Error.', channel)
+            await self.post('API error.', channel)
