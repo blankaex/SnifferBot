@@ -230,9 +230,9 @@ class snifferbot(discord.Client):
             if not tolang in l.values():
                 tolang = l[tolang]
 
-            url = 'http://translate.google.com/m?hl={1}&sl={0}&q={2}&ie=UTF-8&oe=UTF-8'\
-                .format(fromlang, tolang, text)
-            r = requests.get(url)
+            url = 'http://translate.google.com/m'
+            params = {'sl': fromlang, 'hl': tolang, 'q': text, 'ie': 'UTF-8', 'oe': 'UTF-8'}
+            r = requests.get(url, params=params)
             translation = html.unescape(re.search('<div dir="ltr" class="t0">(.*?)</div>',
                 r.text).groups()[0])
 
@@ -265,8 +265,10 @@ class snifferbot(discord.Client):
             if d['cod'] == '429':
                 raise APILimitExceeded
 
+            cond = d['weather'][0]['main']
             temp = d['main']['temp']
             tempf = round(9 * temp / 5.0 + 32, 2)
+            humi = d['main']['humidity']
             wind = d['wind']['speed']
             windm = round(wind * 2.237, 1)
 
@@ -276,8 +278,7 @@ class snifferbot(discord.Client):
                 **Temperature:** {1}°C | {2}°F ::  \
                 **Humidity:** {3}%  ::  \
                 **Wind:** {4}m/s | {5}mph\
-                '''.format(d['weather'][0]['main'], temp, tempf, d['main']['humidity'], wind, windm))
-
+                '''.format(cond, temp, tempf, humi, wind, windm))
             await self.post_embed(title=title, description=description, channel=channel)
 
         except Exception as CityNotFound:
