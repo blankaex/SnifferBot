@@ -5,7 +5,7 @@ bot = snifferbot()
 
 try:
     main_loop = asyncio.get_event_loop()
-    with open('token/discord', 'r') as token:
+    with open('tokens/discord', 'r') as token:
         main_loop.run_until_complete(bot.start(token.read()))
 except KeyboardInterrupt:
     main_loop.run_until_complete(bot.logout())
