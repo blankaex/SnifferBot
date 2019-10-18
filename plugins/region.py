@@ -1,4 +1,4 @@
-import textwrap
+import json, textwrap
 
 async def region(bot, args, author):
     if not bot.roles['309mj'] in author.roles:
