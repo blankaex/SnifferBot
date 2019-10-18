@@ -26,7 +26,7 @@ class event_handler(discord.Client):
 
     async def on_member_join(self, member):
         await helper.log_join(self, member)
-        await member.add_roles(helper.roles['309mj'])
+        await member.add_roles(self.roles['309mj'])
 
 
     async def on_member_remove(self, member):
