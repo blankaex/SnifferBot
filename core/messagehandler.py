@@ -1,4 +1,5 @@
 # figure out how to dynamically import all modules
+from plugins.currency import *
 from plugins.decide import *
 from plugins.eightball import *
 from plugins.fortune import *
@@ -32,6 +33,9 @@ async def handle_message(bot, message):
 
     if command == '!8ball':
         await eightball(bot, channel)
+
+    if command == '!cc' or '!convert':
+        await currency(bot, args, channel)
 
     if command == '!decide':
         await decide(bot, args, channel)
