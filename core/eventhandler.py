@@ -26,6 +26,7 @@ class event_handler(discord.Client):
 
     async def on_member_join(self, member):
         await helper.log_join(self, member)
+        await helper.send_welcome(self, member)
         await member.add_roles(self.roles['309mj'])
 
 

@@ -35,6 +35,11 @@ async def log_leave(bot, member):
     await bot.post_embed(color=0xFF4040, author=message, icon=member.avatar_url, channel='reception')
 
 
+async def send_welcome(bot, member):
+    with open('plugins/data/welcome', 'r') as f:
+        await member.send(content=f.read().strip())
+
+
 async def check_evade(bot, member):
     if bot.roles['mute'] in member.roles:
         await member.ban()
