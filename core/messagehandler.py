@@ -34,7 +34,7 @@ async def handle_message(bot, message):
     if command == '!8ball':
         await eightball(bot, channel)
 
-    if command == '!cc' or '!convert':
+    if command == '!cc' or command == '!convert':
         await currency(bot, args, channel)
 
     if command == '!decide':
