@@ -1,7 +1,7 @@
 import asyncio
 from core.eventhandler import *
 
-bot = event_handler()
+bot = event_handler(intents=discord.Intents.all())
 
 try:
     main_loop = asyncio.get_event_loop()
